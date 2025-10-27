@@ -6,7 +6,8 @@ import random
 st.set_page_config(page_title="KonstitutsiyaLab AI", page_icon="⚖️")
 
 # 👉 BU YERGA O'Z TOKENINGIZNI JOYLASHTIRING
-HUGGINGFACE_API_KEY = "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"
+import streamlit as st
+HUGGINGFACE_API_KEY = st.secrets["HUGGINGFACE_API_KEY"]
 
 # === FUNKSIYA: Hugging Face AI javobi ===
 def ask_ai(prompt):
