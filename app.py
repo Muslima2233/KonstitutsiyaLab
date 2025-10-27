@@ -1,49 +1,57 @@
 import streamlit as st
+import requests
 import random
 
+# === SOZLAMALAR ===
 st.set_page_config(page_title="KonstitutsiyaLab AI", page_icon="⚖️")
 
+# 👉 BU YERGA O'Z TOKENINGIZNI JOYLASHTIRING
+HUGGINGFACE_API_KEY = "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"
+
+# === FUNKSIYA: Hugging Face AI javobi ===
+def ask_ai(prompt):
+    API_URL = "https://api-inference.huggingface.co/models/google/gemma-2b-it"
+    headers = {"Authorization": f"Bearer {HUGGINGFACE_API_KEY}"}
+    data = {"inputs": prompt}
+    response = requests.post(API_URL, headers=headers, json=data)
+    if response.status_code == 200:
+        result = response.json()
+        try:
+            return result[0]["generated_text"]
+        except:
+            return "AI javob qaytara olmadi."
+    else:
+        return f"Xatolik: {response.status_code}"
+
+# === SAHIFA ===
 st.title("🇺🇿 KonstitutsiyaLab AI Platforma")
 st.write("O‘zbekiston Respublikasining 2023-yilgi Konstitutsiyasi asosida AI yordamida o‘rganish platformasi")
 
-menu = st.sidebar.radio("Bo‘limni tanlang:", ["Testlar", "Kazuslar", "Muhim ma'lumotlar"])
+menu = st.sidebar.radio("Bo‘limni tanlang:", ["AI Testlar", "AI Kazuslar", "Muhim ma'lumotlar"])
 
-# === TESTLAR ===
-if menu == "Testlar":
-    st.header("🧩 Test sinovi")
-    questions = [
-        {
-            "savol": "O‘zbekiston Respublikasining Konstitutsiyasi qachon kuchga kirgan?",
-            "javoblar": ["1992-yil 8-dekabr", "2023-yil 1-may", "2022-yil 1-dekabr"],
-            "togrisi": "2023-yil 1-may"
-        },
-        {
-            "savol": "Konstitutsiyada nechta bo‘lim mavjud?",
-            "javoblar": ["7 ta", "10 ta", "12 ta"],
-            "togrisi": "7 ta"
-        }
-    ]
-    ball = 0
-    for q in questions:
-        st.write("**" + q["savol"] + "**")
-        ans = st.radio("Variantni tanlang:", q["javoblar"], key=q["savol"])
-        if st.button("Javobni tekshirish", key=q["savol"]):
-            if ans == q["togrisi"]:
-                st.success("✅ To‘g‘ri javob!")
-                ball += 1
-            else:
-                st.error(f"❌ Noto‘g‘ri. To‘g‘ri javob: {q['togrisi']}")
-    st.info(f"Sizning umumiy ballingiz: {ball}/{len(questions)}")
+# === AI TESTLAR ===
+if menu == "AI Testlar":
+    st.header("🧠 AI tomonidan yaratilgan testlar")
+    st.write("Pastga yozing: masalan, *'3 ta test yarat'* yoki *'1-bo‘lim bo‘yicha test yoz'*")
+    user_input = st.text_input("Buyruqni kiriting:")
+    if st.button("Test yaratish"):
+        with st.spinner("AI test tayyorlamoqda..."):
+            prompt = f"O‘zbekiston Respublikasi Konstitutsiyasi asosida {user_input}. Har bir testda 3 ta variant va to‘g‘ri javob bo‘lsin."
+            answer = ask_ai(prompt)
+            st.success("✅ Natija:")
+            st.write(answer)
 
-# === KAZUSLAR ===
-elif menu == "Kazuslar":
+# === AI KAZUSLAR ===
+elif menu == "AI Kazuslar":
     st.header("⚖️ AI Kazus generatori")
-    kazuslar = [
-        "Fuqarolik masalalarida Konstitutsiya qoidalari qanday ustunlikka ega?",
-        "Agar Prezident muddati tugashidan avval iste’foga chiqsa, kim vaqtincha vazifani bajaradi?",
-        "Mahalliy kengash qarorlari Konstitutsiyaga zid bo‘lsa, nima bo‘ladi?"
-    ]
-    st.write(random.choice(kazuslar))
+    st.write("Masalan: *'Sud hokimiyati bo‘yicha kazus yoz'* yoki *'Prezident vakolatiga oid kazus'*")
+    case_input = st.text_input("Kazus mavzusini kiriting:")
+    if st.button("Kazus yaratish"):
+        with st.spinner("AI kazus tayyorlamoqda..."):
+            prompt = f"O‘zbekiston Respublikasi Konstitutsiyasi asosida {case_input} mavzusida 1 ta o‘ylantiruvchi huquqiy kazus yoz."
+            answer = ask_ai(prompt)
+            st.success("✅ Kazus:")
+            st.write(answer)
 
 # === MUHIM MA'LUMOTLAR ===
 elif menu == "Muhim ma'lumotlar":
@@ -53,7 +61,7 @@ elif menu == "Muhim ma'lumotlar":
     - **Bo‘limlar soni:** 7 ta  
     - **Moddalar soni:** 155 ta  
     - **Davlat tili:** O‘zbek tili  
-    - **Xalq hokimiyatining manbai:** Xalq o‘zi  
     - **Prezident vakolat muddati:** 7 yil  
+    - **Xalq hokimiyatining manbai:** Xalq o‘zi  
     """)
-  
+        
